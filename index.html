@@ -26,7 +26,8 @@
     <!-- Step 1: email -->
     <section id="view-email" class="card narrow hidden">
       <h1>Share rides with classmates</h1>
-      <p class="muted">Find Kellogg students arriving or leaving around the same time, then start a WhatsApp or Slack chat to split the ride.</p>
+      <p class="intro">Use this site to find people to share rides with based on location, date, and time.</p>
+      <p class="muted">Sign in with your Kellogg email, add your ride, and start a WhatsApp or Slack chat with your matches to split the cost.</p>
       <form id="email-form" novalidate>
         <label for="email">Kellogg email</label>
         <input id="email" type="email" autocomplete="email" placeholder="firstname.lastname@kellogg.northwestern.edu" required />
@@ -54,6 +55,7 @@
 
     <!-- Step 3: dashboard -->
     <section id="view-app" class="hidden">
+      <p class="intro page-intro">Use this site to find people to share rides with based on location, date, and time.</p>
       <div class="layout">
         <div class="card">
           <h2>Add a ride</h2>
@@ -138,7 +140,7 @@
               <p class="fine">Times are Chicago time.</p>
             </fieldset>
             <p class="error" id="trip-error"></p>
-            <button class="primary" type="submit" id="trip-submit">Find rideshares</button>
+            <button class="primary" type="submit" id="trip-submit">See my matches</button>
           </form>
         </div>
 

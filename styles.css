@@ -146,3 +146,5 @@ dialog form { text-align: right; margin-top: 12px; }
 .bags-head .fine { font-weight: 400; display: inline; }
 .bags-box label { margin-top: 8px; }
 .trunk { display: flex; gap: 8px; align-items: center; background: var(--purple-tint); border-radius: 8px; padding: 10px 12px; margin-top: 12px; font-size: 14px; }
+.intro { font-size: 16px; font-weight: 500; color: var(--ink); margin: 0 0 8px; }
+.page-intro { background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--purple); border-radius: var(--radius); padding: 14px 18px; margin: 0 0 20px; }
