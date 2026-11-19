@@ -21,13 +21,13 @@ A GitHub Pages site where Kellogg students find classmates arriving or leaving a
 - Users can only read their own rides. Other people's contact info is returned only by `get_matches()`, and only to people with a matching ride.
 - The publishable key in `config.js` is meant to be public.
 
-## One-time Supabase setup (dashboard)
+## One-time Supabase setup (dashboard) — all done ✅
 
 | Setting | Where | Value |
 |---|---|---|
 | **Send a code, not a link** | Authentication → Emails → *Magic Link* template | Body must include `{{ .Token }}` (sample below) |
 | **Kellogg-only sign-ups** | Authentication → Hooks → *Before User Created* | Postgres function `public.hook_kellogg_only_signup` |
-| **Custom SMTP (required for real users)** | Authentication → Emails → SMTP Settings | e.g. Resend, Postmark or SendGrid credentials. Supabase's built-in mailer only sends to your project's team members and is rate-limited. |
+| **Custom SMTP (required for real users)** | Authentication → Emails → SMTP Settings | Currently Gmail: `kelloggridecoordination@gmail.com` via `smtp.gmail.com:465` with a Google app password (about 500 emails/day). Supabase's built-in mailer only sends to project team members. |
 | Site URL | Authentication → URL Configuration | `https://erickalu01.github.io/Kellogg-Rideshare/` |
 
 Sample Magic Link email template:
