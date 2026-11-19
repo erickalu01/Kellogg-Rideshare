@@ -19,6 +19,19 @@ const AIRLINES = {
   "Japan Airlines": "JL", "ANA": "NH", "Korean Air": "KE", "Cathay Pacific": "CX", "Air India": "AI",
   "Iberia": "IB", "Swiss": "LX", "Icelandair": "FI", "Porter": "PD", "Sun Country": "SY",
 };
+function bagText(checked, carry) {
+  if (checked == null && carry == null) return "";
+  const c = Number(checked || 0), k = Number(carry || 0);
+  return `${c} checked bag${c === 1 ? "" : "s"} · ${k} carry-on${k === 1 ? "" : "s"}`;
+}
+function trunkSummary(people) {
+  const withBags = people.filter((p) => p.checked_bags != null || p.carry_ons != null);
+  if (!withBags.length) return "";
+  const c = withBags.reduce((n, p) => n + Number(p.checked_bags || 0), 0);
+  const k = withBags.reduce((n, p) => n + Number(p.carry_ons || 0), 0);
+  const note = withBags.length < people.length ? ` (bags known for ${withBags.length} of ${people.length} people)` : "";
+  return `<div class="trunk">🧳 <span><strong>Trunk space for this group:</strong> ${bagText(c, k)}${note}</span></div>`;
+}
 const dirLabel = (d) => (d === "arrival" ? "Group pick-up" : "Group drop-off");
 function show(view) {
   views.forEach((v) => $(v).classList.toggle("hidden", v !== view));
@@ -57,7 +70,7 @@ function tripSummary(t) {
 function introMessage(me, others) {
   const names = others.map((o) => o.name.split(" ")[0]).join(", ");
   return `Hi ${names}! I'm ${me.name} from Kellogg — Kellogg Rideshare matched us. ` +
-    `I'm ${tripSummary(me)}. Want to share a ride?`;
+    `I'm ${tripSummary(me)}${me.checked_bags != null ? ` with ${bagText(me.checked_bags, me.carry_ons).replace(" · ", " and ")}` : ""}. Want to share a ride?`;
 }
 
 // ---------- auth ----------
@@ -146,7 +159,7 @@ function updateFormLabels() {
   const isAirport = loc === "airport";
   $("location-other").classList.toggle("hidden", loc !== "other");
   $("airport-fields").classList.toggle("hidden", !isAirport);
-  ["airport", "airline", "flight", "bags"].forEach((id) => ($(id).required = isAirport));
+  ["airport", "airline", "flight", "checked", "carryon"].forEach((id) => ($(id).required = isAirport));
   $("location-other").required = loc === "other";
   $("time-label").textContent = isAirport
     ? (dir === "arrival" ? "Flight arrival time" : "Flight departure time")
@@ -190,7 +203,8 @@ $("trip-form").addEventListener("submit", async (e) => {
     p_airport_code: isAirport ? $("airport").value.trim().toUpperCase() : null,
     p_airline: isAirport ? airline : null,
     p_flight_number: isAirport ? flight : null,
-    p_luggage: isAirport ? Number($("bags").value) : null,
+    p_checked_bags: isAirport ? Number($("checked").value) : null,
+    p_carry_ons: isAirport ? Number($("carryon").value) : null,
   };
   store("kr_name", params.p_name);
   store("kr_phone", params.p_phone);
@@ -199,7 +213,7 @@ $("trip-form").addEventListener("submit", async (e) => {
   busy(true);
   const { data, error } = await sb.rpc("submit_trip", params);
   if (error) { busy(false); $("trip-submit").disabled = false; err.textContent = error.message; return; }
-  $("time").value = ""; $("flight").value = ""; $("bags").value = ""; $("airline").value = "";
+  $("time").value = ""; $("flight").value = ""; $("checked").value = ""; $("carryon").value = ""; $("airline").value = "";
   await showMatches(data.id);
   await loadTrips();
   busy(false);
@@ -251,7 +265,8 @@ async function showMatches(tripId) {
   box.classList.remove("hidden");
   if (error) { box.innerHTML = `<p class="error">${esc(error.message)}</p>`; return; }
   const me = data.trip;
-  const head = `<h2>Your ride</h2><p class="muted">${esc(tripSummary(me))}</p>${flightNote ? `<p class="fine">${flightNote}</p>` : ""}`;
+  const myBags = bagText(me.checked_bags, me.carry_ons);
+  const head = `<h2>Your ride</h2><p class="muted">${esc(tripSummary(me))}${myBags ? `<br>🧳 ${esc(myBags)}` : ""}</p>${flightNote ? `<p class="fine">${flightNote}</p>` : ""}`;
 
   if (data.mode === "none") {
     box.innerHTML = head + `
@@ -271,12 +286,13 @@ async function showMatches(tripId) {
 function personCard(m, selectable) {
   const gap = m.minutes_apart === 0 ? "same time" : `${Math.abs(m.minutes_apart)} min ${m.minutes_apart < 0 ? "earlier" : "later"}`;
   const flight = m.flight_number ? ` · ${m.airline ? esc(m.airline) + " " : ""}${esc(m.flight_number)}` : "";
-  const bags = m.luggage != null ? ` · ${m.luggage} bag${m.luggage === 1 ? "" : "s"}` : "";
+  const bags = bagText(m.checked_bags, m.carry_ons);
   const inner = `
     <span class="avatar">${esc(initials(m.name))}</span>
     <div>
       <div class="who">${esc(m.name)} <span class="badge">${dirLabel(m.direction)}</span> ${m.in_group ? '<span class="badge">In proposed group</span>' : ""}</div>
-      <div class="meta">${esc(fmtTime(m.match_at))} (${gap})${flight}${bags}</div>
+      <div class="meta">${esc(fmtTime(m.match_at))} (${gap})${flight}</div>
+      ${bags ? `<div class="meta">🧳 ${esc(bags)}</div>` : ""}
       <div class="meta"><a href="tel:+${esc(m.phone)}">${esc(fmtPhone(m.phone))}</a> · <a href="mailto:${esc(m.email)}">${esc(m.email)}</a></div>
     </div>`;
   if (selectable) {
@@ -294,6 +310,7 @@ function renderOptionA(box, head, data) {
     <p class="muted">Nobody has grouped up for this time slot yet. Start a group chat to coordinate.</p>
     ${already}
     <ul class="people">${people.map((m) => personCard(m, false)).join("")}</ul>
+    ${trunkSummary([me, ...people])}
     <div class="actions">
       <button class="btn wa" id="start-wa">Start WhatsApp group</button>
       <button class="btn slack" id="start-slack">Start Slack group</button>
@@ -309,6 +326,7 @@ function renderOptionB(box, head, data) {
     <h3>Others are already coordinating this time slot</h3>
     <div class="notice">A group chat may already have been created for these people. Reach out to one of them directly and ask to be added to the ride.</div>
     <ul class="people">${people.map((m, i) => personCard(m, true)).join("")}</ul>
+    ${trunkSummary([me, ...people])}
     <p class="error" id="pick-error"></p>
     <div class="actions">
       <button class="btn wa" id="dm-wa">Message on WhatsApp</button>

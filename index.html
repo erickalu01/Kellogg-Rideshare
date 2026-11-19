@@ -108,9 +108,18 @@
                     <label for="flight">Flight number</label>
                     <input id="flight" placeholder="1234 or UA1234" />
                   </div>
-                  <div>
-                    <label for="bags">Bags</label>
-                    <input id="bags" type="number" min="0" max="20" placeholder="2" />
+                </div>
+                <div class="bags-box">
+                  <div class="bags-head">Luggage <span class="fine">— helps your group estimate trunk space for the rideshare</span></div>
+                  <div class="grid2">
+                    <div>
+                      <label for="checked">Checked bags</label>
+                      <input id="checked" type="number" min="0" max="20" inputmode="numeric" placeholder="0" />
+                    </div>
+                    <div>
+                      <label for="carryon">Carry-ons</label>
+                      <input id="carryon" type="number" min="0" max="20" inputmode="numeric" placeholder="0" />
+                    </div>
                   </div>
                 </div>
                 <p class="fine">We check your flight on a live flight tracker and match on its latest arrival/departure time.</p>

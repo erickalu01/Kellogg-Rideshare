@@ -140,3 +140,9 @@ dialog ol { padding-left: 20px; }
 dialog li { margin-bottom: 8px; }
 dialog textarea { width: 100%; min-height: 110px; font: inherit; padding: 10px; border: 1px solid var(--line); border-radius: 8px; }
 dialog form { text-align: right; margin-top: 12px; }
+
+.bags-box { margin-top: 14px; padding: 10px 12px 12px; background: #fff; border: 1px dashed var(--line); border-radius: 8px; }
+.bags-head { font-weight: 600; font-size: 14px; }
+.bags-head .fine { font-weight: 400; display: inline; }
+.bags-box label { margin-top: 8px; }
+.trunk { display: flex; gap: 8px; align-items: center; background: var(--purple-tint); border-radius: 8px; padding: 10px 12px; margin-top: 12px; font-size: 14px; }
