@@ -59,7 +59,8 @@ input, select {
 }
 input:focus, select:focus { outline: 2px solid var(--purple); outline-offset: 0; border-color: transparent; }
 #location-other { margin-top: 8px; }
-#airport, #flight { text-transform: uppercase; }
+#airport:not(:placeholder-shown), #flight:not(:placeholder-shown) { text-transform: uppercase; }
+input[readonly] { background: var(--bg); color: var(--muted); }
 fieldset { border: 0; padding: 0; margin: 0 0 20px; }
 legend { font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--purple); }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

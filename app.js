@@ -11,6 +11,15 @@ let currentUser = null;
 let pendingEmail = "";
 
 // ---------- helpers ----------
+const AIRLINES = {
+  "United": "UA", "American": "AA", "Delta": "DL", "Southwest": "WN", "Alaska": "AS",
+  "JetBlue": "B6", "Spirit": "NK", "Frontier": "F9", "Air Canada": "AC", "British Airways": "BA",
+  "Lufthansa": "LH", "Air France": "AF", "KLM": "KL", "Aer Lingus": "EI", "Turkish Airlines": "TK",
+  "Emirates": "EK", "Qatar Airways": "QR", "Aeromexico": "AM", "Copa": "CM", "Avianca": "AV",
+  "Japan Airlines": "JL", "ANA": "NH", "Korean Air": "KE", "Cathay Pacific": "CX", "Air India": "AI",
+  "Iberia": "IB", "Swiss": "LX", "Icelandair": "FI", "Porter": "PD", "Sun Country": "SY",
+};
+const dirLabel = (d) => (d === "arrival" ? "Group pick-up" : "Group drop-off");
 function show(view) {
   views.forEach((v) => $(v).classList.toggle("hidden", v !== view));
   $("userbox").classList.toggle("hidden", view !== "view-app");
@@ -41,14 +50,14 @@ function friendlyError(e) {
 }
 function tripSummary(t) {
   const place = t.location_type === "airport" ? `${t.airport_code}` : t.location_name;
-  const verb = t.direction === "arrival" ? `arriving at ${place}` : `leaving for ${place}`;
-  const flight = t.flight_number ? ` (${t.flight_number})` : "";
+  const verb = t.direction === "arrival" ? `on a group pick-up at ${place}` : `on a group drop-off at ${place}`;
+  const flight = t.flight_number ? ` (${t.airline ? t.airline + " " : ""}${t.flight_number})` : "";
   return `${verb} ${fmtTime(t.match_at)}${flight}`;
 }
 function introMessage(me, others) {
   const names = others.map((o) => o.name.split(" ")[0]).join(", ");
   return `Hi ${names}! I'm ${me.name} from Kellogg — Kellogg Rideshare matched us. ` +
-    `I'm ${tripSummary(me)}. Want to share a ride${me.direction === "arrival" ? " back to campus" : ""}?`;
+    `I'm ${tripSummary(me)}. Want to share a ride?`;
 }
 
 // ---------- auth ----------
@@ -120,6 +129,9 @@ async function handleSession(session) {
 
 // ---------- trip form ----------
 function initForm() {
+  $("kemail").value = currentUser?.email || "";
+  const dl = $("airlines");
+  if (!dl.children.length) dl.innerHTML = Object.keys(AIRLINES).map((a) => `<option value="${a}"></option>`).join("");
   $("name").value ||= load("kr_name");
   $("phone").value ||= load("kr_phone");
   if (!$("date").value) {
@@ -132,14 +144,13 @@ function updateFormLabels() {
   const dir = document.querySelector('input[name="direction"]:checked')?.value;
   const loc = $("location").value;
   const isAirport = loc === "airport";
-  $("location-label").textContent = dir === "arrival" ? "Pick-up location" : "Drop-off destination";
   $("location-other").classList.toggle("hidden", loc !== "other");
   $("airport-fields").classList.toggle("hidden", !isAirport);
-  ["airport", "flight", "bags"].forEach((id) => ($(id).required = isAirport));
+  ["airport", "airline", "flight", "bags"].forEach((id) => ($(id).required = isAirport));
   $("location-other").required = loc === "other";
   $("time-label").textContent = isAirport
     ? (dir === "arrival" ? "Flight arrival time" : "Flight departure time")
-    : (dir === "arrival" ? "Pick-up time" : "Time you want to leave campus");
+    : (dir === "arrival" ? "Pick-up time" : "Drop-off time");
 }
 document.querySelectorAll('input[name="direction"]').forEach((r) => r.addEventListener("change", updateFormLabels));
 $("location").addEventListener("change", updateFormLabels);
@@ -160,6 +171,14 @@ $("trip-form").addEventListener("submit", async (e) => {
   if (phoneDigits.length < 10 || phoneDigits.length > 15) { err.textContent = "Enter a valid phone number (with country code if outside the US)."; return; }
   const loc = $("location").value;
   const isAirport = loc === "airport";
+  // Flight number: accept "1234" and add the carrier code if we know it.
+  let flight = $("flight").value.replace(/\s/g, "").toUpperCase();
+  const airline = $("airline").value.trim();
+  const code = AIRLINES[Object.keys(AIRLINES).find((a) => a.toLowerCase() === airline.toLowerCase())];
+  if (isAirport && /^\d{1,4}$/.test(flight)) {
+    if (!code) { err.textContent = "Enter the full flight number including the airline code (e.g. UA1234)."; return; }
+    flight = code + flight;
+  }
   const params = {
     p_name: $("name").value.trim(),
     p_phone: $("phone").value,
@@ -169,7 +188,8 @@ $("trip-form").addEventListener("submit", async (e) => {
     p_date: $("date").value,
     p_time: $("time").value,
     p_airport_code: isAirport ? $("airport").value.trim().toUpperCase() : null,
-    p_flight_number: isAirport ? $("flight").value.replace(/\s/g, "").toUpperCase() : null,
+    p_airline: isAirport ? airline : null,
+    p_flight_number: isAirport ? flight : null,
     p_luggage: isAirport ? Number($("bags").value) : null,
   };
   store("kr_name", params.p_name);
@@ -179,7 +199,7 @@ $("trip-form").addEventListener("submit", async (e) => {
   busy(true);
   const { data, error } = await sb.rpc("submit_trip", params);
   if (error) { busy(false); $("trip-submit").disabled = false; err.textContent = error.message; return; }
-  $("time").value = ""; $("flight").value = ""; $("bags").value = "";
+  $("time").value = ""; $("flight").value = ""; $("bags").value = ""; $("airline").value = "";
   await showMatches(data.id);
   await loadTrips();
   busy(false);
@@ -196,7 +216,7 @@ async function loadTrips() {
   box.innerHTML = upcoming.map((t) => `
     <div class="trip">
       <div>
-        <div class="title">${t.direction === "arrival" ? "Pick-up from" : "Drop-off at"} ${esc(t.location_type === "airport" ? t.airport_code : t.location_name)}</div>
+        <div class="title">${dirLabel(t.direction)} · ${esc(t.location_type === "airport" ? t.airport_code : t.location_name)}</div>
         <div class="sub">${esc(fmtTime(t.match_at))}${t.flight_number ? " · " + esc(t.flight_number) : ""}${t.flight_status ? " · " + esc(t.flight_status) : ""}</div>
       </div>
       <div class="btns">
@@ -235,7 +255,7 @@ async function showMatches(tripId) {
 
   if (data.mode === "none") {
     box.innerHTML = head + `
-      <div class="notice">No one else is ${me.direction === "arrival" ? "arriving" : "leaving"} within 30 minutes of you yet.
+      <div class="notice">No one else has a ride at this location within 30 minutes of you yet.
       Your ride is saved — anyone who matches later will see your contact info and reach out. You can also check back here.</div>
       <div class="actions"><button class="btn" id="recheck">Check again</button></div>`;
     $("recheck").onclick = async () => { busy(true); await showMatches(tripId); busy(false); };
@@ -250,12 +270,12 @@ async function showMatches(tripId) {
 
 function personCard(m, selectable) {
   const gap = m.minutes_apart === 0 ? "same time" : `${Math.abs(m.minutes_apart)} min ${m.minutes_apart < 0 ? "earlier" : "later"}`;
-  const flight = m.flight_number ? ` · ${esc(m.flight_number)}` : "";
+  const flight = m.flight_number ? ` · ${m.airline ? esc(m.airline) + " " : ""}${esc(m.flight_number)}` : "";
   const bags = m.luggage != null ? ` · ${m.luggage} bag${m.luggage === 1 ? "" : "s"}` : "";
   const inner = `
     <span class="avatar">${esc(initials(m.name))}</span>
     <div>
-      <div class="who">${esc(m.name)} ${m.in_group ? '<span class="badge">In proposed group</span>' : ""}</div>
+      <div class="who">${esc(m.name)} <span class="badge">${dirLabel(m.direction)}</span> ${m.in_group ? '<span class="badge">In proposed group</span>' : ""}</div>
       <div class="meta">${esc(fmtTime(m.match_at))} (${gap})${flight}${bags}</div>
       <div class="meta"><a href="tel:+${esc(m.phone)}">${esc(fmtPhone(m.phone))}</a> · <a href="mailto:${esc(m.email)}">${esc(m.email)}</a></div>
     </div>`;

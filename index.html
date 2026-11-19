@@ -70,17 +70,19 @@
                   <input id="phone" type="tel" autocomplete="tel" placeholder="+1 312 555 0123" required />
                 </div>
               </div>
-              <p class="fine">Include your country code if it isn't +1. Slack chats use your Kellogg email.</p>
+              <label for="kemail">Email (Kellogg)</label>
+              <input id="kemail" type="email" readonly required />
+              <p class="fine">Your verified Kellogg email, used for Slack. Include your phone's country code if it isn't +1.</p>
             </fieldset>
 
             <fieldset>
               <legend>Trip</legend>
               <div class="seg" role="radiogroup" aria-label="Trip type">
-                <label><input type="radio" name="direction" value="arrival" required checked /> <span>Arriving — need a pick-up</span></label>
-                <label><input type="radio" name="direction" value="departure" /> <span>Leaving — need a drop-off</span></label>
+                <label><input type="radio" name="direction" value="arrival" required checked /> <span>Group pick-up</span></label>
+                <label><input type="radio" name="direction" value="departure" /> <span>Group drop-off</span></label>
               </div>
 
-              <label for="location" id="location-label">Pick-up location</label>
+              <label for="location" id="location-label">Location</label>
               <select id="location" required>
                 <option value="">Choose…</option>
                 <option value="airport">Airport</option>
@@ -91,15 +93,20 @@
               <input id="location-other" class="hidden" placeholder="Where? (e.g. Evanston Davis St station)" />
 
               <div id="airport-fields" class="subq hidden">
-                <div class="grid3">
+                <div class="grid2">
                   <div>
                     <label for="airport">Airport code</label>
                     <input id="airport" list="airports" maxlength="3" placeholder="ORD" />
                     <datalist id="airports"><option value="ORD">O'Hare</option><option value="MDW">Midway</option></datalist>
                   </div>
                   <div>
+                    <label for="airline">Airline carrier</label>
+                    <input id="airline" list="airlines" placeholder="United" />
+                    <datalist id="airlines"></datalist>
+                  </div>
+                  <div>
                     <label for="flight">Flight number</label>
-                    <input id="flight" placeholder="UA1234" />
+                    <input id="flight" placeholder="1234 or UA1234" />
                   </div>
                   <div>
                     <label for="bags">Bags</label>

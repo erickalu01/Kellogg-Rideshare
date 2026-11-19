@@ -8,9 +8,9 @@ A GitHub Pages site where Kellogg students find classmates arriving or leaving a
 ## How it works
 
 1. A visitor enters their `@kellogg.northwestern.edu` email and Supabase emails them a one-time code.
-2. After verifying, they add a ride: name, phone, arriving/leaving, location, date and time. If the location is an airport, they also enter the airport code, flight number and number of bags.
+2. After verifying, they add a ride: name, phone, Kellogg email (pre-filled, verified), group pick-up or group drop-off, location, date and time. If the location is an airport, they also enter the airport code, airline carrier, flight number and number of bags.
 3. For airport rides, the `flight-sync` edge function looks up the flight on AeroDataBox. The live arrival or departure time replaces the typed time for matching.
-4. `get_matches()` finds other rides with the same direction and location within 30 minutes:
+4. `get_matches()` finds other rides at the same location within 30 minutes (date + time), whether they're a group pick-up or drop-off:
    - **Option A**: none of these people has been grouped yet. The site records a proposed group and offers **Start WhatsApp group** / **Start Slack group**.
    - **Option B**: some of them are already in a proposed group. The site says a group may already exist and lets the user pick one person to message directly.
    - Every time contact info is shown, it is logged in `contact_shares`.
