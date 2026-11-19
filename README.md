@@ -39,6 +39,8 @@ Sample Magic Link email template:
 <p>It expires in 1 hour. If you didn't request it, ignore this email.</p>
 ```
 
+Keep the template code-only (no `{{ .ConfirmationURL }}` link): Northwestern's email security scanner opens links in incoming mail, which uses up the one-time code before the student can enter it.
+
 ## Optional integrations (Edge Function secrets)
 
 Set these under **Edge Functions → Secrets**:
