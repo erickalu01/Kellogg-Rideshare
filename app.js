@@ -1,5 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, ALLOWED_DOMAIN, TIMEZONE } from "./config.js?v=6";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, ALLOWED_DOMAIN, TIMEZONE } from "./config.js?v=7";
 
 const sb = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
@@ -154,16 +154,12 @@ function initForm() {
 }
 
 function updateFormLabels() {
-  const dir = document.querySelector('input[name="direction"]:checked')?.value;
   const loc = $("location").value;
   const isAirport = loc === "airport";
   $("location-other").classList.toggle("hidden", loc !== "other");
   $("airport-fields").classList.toggle("hidden", !isAirport);
   ["airport", "airline", "flight", "checked", "carryon"].forEach((id) => ($(id).required = isAirport));
   $("location-other").required = loc === "other";
-  $("time-label").textContent = isAirport
-    ? (dir === "arrival" ? "Flight arrival time" : "Flight departure time")
-    : (dir === "arrival" ? "Pick-up time" : "Drop-off time");
 }
 document.querySelectorAll('input[name="direction"]').forEach((r) => r.addEventListener("change", updateFormLabels));
 $("location").addEventListener("change", updateFormLabels);

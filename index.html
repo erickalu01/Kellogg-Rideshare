@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="stylesheet" href="styles.css?v=7" />
 </head>
 <body>
   <header class="topbar">
@@ -84,6 +84,17 @@
                 <label><input type="radio" name="direction" value="departure" /> <span>Group drop-off</span></label>
               </div>
 
+              <div class="grid2">
+                <div>
+                  <label for="date">Date</label>
+                  <input id="date" type="date" required />
+                </div>
+                <div>
+                  <label for="time">Time</label>
+                  <input id="time" type="time" required />
+                </div>
+              </div>
+              <p class="fine">Times are Chicago time.</p>
               <label for="location" id="location-label">Location</label>
               <select id="location" required>
                 <option value="">Choose…</option>
@@ -127,17 +138,6 @@
                 <p class="fine">We check your flight on a live flight tracker and match on its latest arrival/departure time.</p>
               </div>
 
-              <div class="grid2">
-                <div>
-                  <label for="date">Date</label>
-                  <input id="date" type="date" required />
-                </div>
-                <div>
-                  <label for="time" id="time-label">Time</label>
-                  <input id="time" type="time" required />
-                </div>
-              </div>
-              <p class="fine">Times are Chicago time.</p>
             </fieldset>
             <p class="error" id="trip-error"></p>
             <button class="primary" type="submit" id="trip-submit">See my matches</button>
@@ -162,6 +162,6 @@
     <form method="dialog"><button class="link">Close</button></form>
   </dialog>
 
-  <script type="module" src="app.js?v=6"></script>
+  <script type="module" src="app.js?v=7"></script>
 </body>
 </html>
