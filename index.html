@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kellogg Rideshare</title>
+  <meta name="description" content="Coordinate rides to and from the airport with other Kellogg students." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">K</span>
+      <span>Kellogg Rideshare</span>
+    </div>
+    <div id="userbox" class="userbox hidden">
+      <span id="useremail"></span>
+      <button id="signout" class="link">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Step 1: email -->
+    <section id="view-email" class="card narrow hidden">
+      <h1>Share rides with classmates</h1>
+      <p class="muted">Find Kellogg students arriving or leaving around the same time, then start a WhatsApp or Slack chat to split the ride.</p>
+      <form id="email-form" novalidate>
+        <label for="email">Kellogg email</label>
+        <input id="email" type="email" autocomplete="email" placeholder="firstname.lastname@kellogg.northwestern.edu" required />
+        <p class="error" id="email-error"></p>
+        <button class="primary" type="submit">Send me a code</button>
+      </form>
+      <p class="fine">Only <strong>@kellogg.northwestern.edu</strong> addresses can sign in.</p>
+    </section>
+
+    <!-- Step 2: OTP -->
+    <section id="view-code" class="card narrow hidden">
+      <h1>Check your email</h1>
+      <p class="muted">We sent a one-time code to <strong id="code-email"></strong>. (If the email has a sign-in link instead, clicking it works too.)</p>
+      <form id="code-form" novalidate>
+        <label for="code">Verification code</label>
+        <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456" required />
+        <p class="error" id="code-error"></p>
+        <button class="primary" type="submit">Verify</button>
+      </form>
+      <div class="row-links">
+        <button class="link" id="resend">Resend code</button>
+        <button class="link" id="change-email">Use a different email</button>
+      </div>
+    </section>
+
+    <!-- Step 3: dashboard -->
+    <section id="view-app" class="hidden">
+      <div class="layout">
+        <div class="card">
+          <h2>Add a ride</h2>
+          <form id="trip-form" novalidate>
+            <fieldset>
+              <legend>Contact information</legend>
+              <div class="grid2">
+                <div>
+                  <label for="name">Name</label>
+                  <input id="name" autocomplete="name" required />
+                </div>
+                <div>
+                  <label for="phone">Phone (WhatsApp)</label>
+                  <input id="phone" type="tel" autocomplete="tel" placeholder="+1 312 555 0123" required />
+                </div>
+              </div>
+              <p class="fine">Include your country code if it isn't +1. Slack chats use your Kellogg email.</p>
+            </fieldset>
+
+            <fieldset>
+              <legend>Trip</legend>
+              <div class="seg" role="radiogroup" aria-label="Trip type">
+                <label><input type="radio" name="direction" value="arrival" required checked /> <span>Arriving — need a pick-up</span></label>
+                <label><input type="radio" name="direction" value="departure" /> <span>Leaving — need a drop-off</span></label>
+              </div>
+
+              <label for="location" id="location-label">Pick-up location</label>
+              <select id="location" required>
+                <option value="">Choose…</option>
+                <option value="airport">Airport</option>
+                <option value="Chicago Union Station">Chicago Union Station</option>
+                <option value="Ogilvie Transportation Center">Ogilvie Transportation Center</option>
+                <option value="other">Other…</option>
+              </select>
+              <input id="location-other" class="hidden" placeholder="Where? (e.g. Evanston Davis St station)" />
+
+              <div id="airport-fields" class="subq hidden">
+                <div class="grid3">
+                  <div>
+                    <label for="airport">Airport code</label>
+                    <input id="airport" list="airports" maxlength="3" placeholder="ORD" />
+                    <datalist id="airports"><option value="ORD">O'Hare</option><option value="MDW">Midway</option></datalist>
+                  </div>
+                  <div>
+                    <label for="flight">Flight number</label>
+                    <input id="flight" placeholder="UA1234" />
+                  </div>
+                  <div>
+                    <label for="bags">Bags</label>
+                    <input id="bags" type="number" min="0" max="20" placeholder="2" />
+                  </div>
+                </div>
+                <p class="fine">We check your flight on a live flight tracker and match on its latest arrival/departure time.</p>
+              </div>
+
+              <div class="grid2">
+                <div>
+                  <label for="date">Date</label>
+                  <input id="date" type="date" required />
+                </div>
+                <div>
+                  <label for="time" id="time-label">Time</label>
+                  <input id="time" type="time" required />
+                </div>
+              </div>
+              <p class="fine">Times are Chicago time.</p>
+            </fieldset>
+            <p class="error" id="trip-error"></p>
+            <button class="primary" type="submit" id="trip-submit">Find rideshares</button>
+          </form>
+        </div>
+
+        <div>
+          <div id="results" class="card hidden" aria-live="polite"></div>
+          <div class="card">
+            <h2>My rides</h2>
+            <div id="my-trips"><p class="muted">No rides yet.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="loading" class="loading hidden"><div class="spinner"></div></div>
+  </main>
+
+  <dialog id="modal">
+    <div id="modal-body"></div>
+    <form method="dialog"><button class="link">Close</button></form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
