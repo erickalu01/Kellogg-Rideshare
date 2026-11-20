@@ -130,9 +130,39 @@ button { font: inherit; cursor: pointer; }
 .trip .sub { font-size: 13px; color: var(--muted); }
 .trip .btns { display: flex; gap: 8px; flex-shrink: 0; }
 
-.loading { position: fixed; inset: 0; background: rgba(255,255,255,.6); display: grid; place-items: center; z-index: 50; }
-.spinner { width: 36px; height: 36px; border: 3px solid var(--purple-tint); border-top-color: var(--purple); border-radius: 50%; animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+/* Loading overlay: a 2-inch vehicle drives across a purple skyline */
+.loading {
+  position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; align-content: center; gap: 10px;
+  background: rgba(250, 249, 252, .88); backdrop-filter: blur(3px);
+}
+.road { position: relative; width: 100%; height: 2.1in; overflow: hidden; }
+.skyline { position: absolute; left: 0; right: 0; bottom: 10px; height: 120px; }
+.skyline svg { width: 100%; height: 100%; display: block; }
+.ground { position: absolute; left: 0; right: 0; bottom: 8px; height: 2px; background: linear-gradient(90deg, transparent, var(--purple-tint) 15%, #d8cdee 50%, var(--purple-tint) 85%, transparent); }
+.drive {
+  position: absolute; bottom: 4px; left: 0; display: flex; align-items: flex-end;
+  animation: drive-across 1.5s cubic-bezier(.35, .05, .45, 1) infinite;
+  will-change: transform;
+}
+.vehicle { width: 2in; height: calc(2in * 90 / 220); }
+.vehicle svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 3px 4px rgba(78, 42, 132, .18)); animation: bob .35s ease-in-out infinite alternate; }
+.speed { display: grid; gap: 7px; margin-right: 6px; margin-bottom: 18px; }
+.speed i { display: block; height: 4px; border-radius: 3px; background: linear-gradient(90deg, transparent, var(--purple)); opacity: .35; }
+.speed i:nth-child(1) { width: 1.1in; }
+.speed i:nth-child(2) { width: .7in; opacity: .25; }
+.speed i:nth-child(3) { width: 1.3in; }
+.speed i:nth-child(4) { width: .5in; opacity: .2; }
+.loading-text { margin: 0; font-weight: 600; color: var(--purple); letter-spacing: .01em; }
+@keyframes drive-across {
+  from { transform: translateX(calc(-2in - 1.5in)); }
+  to   { transform: translateX(100vw); }
+}
+@keyframes bob { from { transform: translateY(0); } to { transform: translateY(-1.5px); } }
+@media (prefers-reduced-motion: reduce) {
+  .drive { animation: none; left: 50%; transform: translateX(-50%); }
+  .speed { display: none; }
+  .vehicle svg { animation: none; }
+}
 
 dialog { border: 0; border-radius: var(--radius); padding: 24px; max-width: 520px; width: calc(100% - 32px); }
 dialog::backdrop { background: rgba(29, 27, 34, .45); }

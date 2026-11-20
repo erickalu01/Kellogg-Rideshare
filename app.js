@@ -1,5 +1,6 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, ALLOWED_DOMAIN, TIMEZONE } from "./config.js?v=7";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, ALLOWED_DOMAIN, TIMEZONE } from "./config.js?v=8";
+import { nextVehicle, SKYLINE } from "./vehicles.js?v=8";
 
 const sb = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
@@ -37,7 +38,34 @@ function show(view) {
   views.forEach((v) => $(v).classList.toggle("hidden", v !== view));
   $("userbox").classList.toggle("hidden", view !== "view-app");
 }
-function busy(on) { $("loading").classList.toggle("hidden", !on); }
+// Loading overlay: a 2-inch vehicle drives across the screen.
+// It stays up for at least one full pass so the animation never flickers.
+const MIN_SHOW_MS = 1500;
+let shownAt = 0, hideTimer = null, busyCount = 0;
+function busy(on, msg = "Loading…") {
+  const el = $("loading");
+  if (on) {
+    busyCount++;
+    clearTimeout(hideTimer);
+    if (el.classList.contains("hidden")) {
+      const v = nextVehicle();
+      el.querySelector(".vehicle").innerHTML = v.svg;
+      el.querySelector(".skyline").innerHTML ||= SKYLINE;
+      const drive = el.querySelector(".drive");
+      drive.style.animation = "none"; void drive.offsetWidth; drive.style.animation = "";
+      shownAt = Date.now();
+      el.classList.remove("hidden");
+    }
+    el.querySelector(".loading-text").textContent = msg;
+    return Promise.resolve();
+  }
+  busyCount = Math.max(0, busyCount - 1);
+  if (busyCount > 0) return Promise.resolve();
+  const wait = Math.max(0, MIN_SHOW_MS - (Date.now() - shownAt));
+  return new Promise((res) => {
+    hideTimer = setTimeout(() => { if (busyCount === 0) el.classList.add("hidden"); res(); }, wait);
+  });
+}
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
@@ -82,7 +110,7 @@ $("email-form").addEventListener("submit", async (e) => {
     $("email-error").textContent = `Please use your ${ALLOWED_DOMAIN} email address.`;
     return;
   }
-  busy(true);
+  busy(true, "Sending your code…");
   const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname } });
   busy(false);
   if (error) { $("email-error").textContent = friendlyError(error); return; }
@@ -98,7 +126,7 @@ $("code-form").addEventListener("submit", async (e) => {
   const token = $("code").value.replace(/\D/g, "");
   $("code-error").textContent = "";
   if (token.length < 6) { $("code-error").textContent = "Enter the code from your email."; return; }
-  busy(true);
+  busy(true, "Checking your code…");
   const { error } = await sb.auth.verifyOtp({ email: pendingEmail, token, type: "email" });
   busy(false);
   if (error) $("code-error").textContent = friendlyError(error);
@@ -106,7 +134,7 @@ $("code-form").addEventListener("submit", async (e) => {
 
 $("resend").addEventListener("click", async () => {
   if (!pendingEmail) return show("view-email");
-  busy(true);
+  busy(true, "Sending a new code…");
   const { error } = await sb.auth.signInWithOtp({ email: pendingEmail });
   busy(false);
   $("code-error").textContent = error ? friendlyError(error) : "";
@@ -206,7 +234,7 @@ $("trip-form").addEventListener("submit", async (e) => {
   store("kr_phone", params.p_phone);
 
   $("trip-submit").disabled = true;
-  busy(true);
+  busy(true, "Finding your matches…");
   const { data, error } = await sb.rpc("submit_trip", params);
   if (error) { busy(false); $("trip-submit").disabled = false; err.textContent = error.message; return; }
   $("time").value = ""; $("flight").value = ""; $("checked").value = ""; $("carryon").value = ""; $("airline").value = "";
@@ -235,7 +263,7 @@ async function loadTrips() {
       </div>
     </div>`).join("");
   box.querySelectorAll("[data-matches]").forEach((b) => b.addEventListener("click", async () => {
-    busy(true); await showMatches(b.dataset.matches); busy(false);
+    busy(true, "Finding your matches…"); await showMatches(b.dataset.matches); busy(false);
   }));
   box.querySelectorAll("[data-delete]").forEach((b) => b.addEventListener("click", async () => {
     if (!confirm("Delete this ride? Others will no longer be matched with you for it.")) return;
@@ -269,7 +297,7 @@ async function showMatches(tripId) {
       <div class="notice">No one else has a ride at this location within 30 minutes of you yet.
       Your ride is saved — anyone who matches later will see your contact info and reach out. You can also check back here.</div>
       <div class="actions"><button class="btn" id="recheck">Check again</button></div>`;
-    $("recheck").onclick = async () => { busy(true); await showMatches(tripId); busy(false); };
+    $("recheck").onclick = async () => { busy(true, "Checking for new matches…"); await showMatches(tripId); busy(false); };
     box.scrollIntoView({ behavior: "smooth", block: "start" });
     return;
   }
@@ -369,7 +397,7 @@ async function startWhatsAppGroup(data, me, people) {
 async function startSlack(data, me, people, isGroup) {
   // Open the tab synchronously so pop-up blockers allow it, then point it at Slack.
   const win = window.open("about:blank", "_blank");
-  busy(true);
+  busy(true, "Opening Slack…");
   const message = introMessage(me, people);
   const { data: res, error } = await sb.functions.invoke("slack-connect", {
     body: { my_trip_id: me.id, target_trip_ids: people.map((p) => p.trip_id), message },
@@ -402,6 +430,8 @@ async function startSlack(data, me, people, isGroup) {
 
 // ---------- boot ----------
 (async () => {
+  busy(true, "Loading…");
   const { data } = await sb.auth.getSession();
   await handleSession(data.session);
+  busy(false);
 })();
