@@ -130,39 +130,47 @@ button { font: inherit; cursor: pointer; }
 .trip .sub { font-size: 13px; color: var(--muted); }
 .trip .btns { display: flex; gap: 8px; flex-shrink: 0; }
 
-/* Loading overlay: a 2-inch vehicle drives across a purple skyline */
+/* Loading overlay: a parked 2-inch vehicle in front of the skyline, with streaks fading in and out behind it */
 .loading {
-  position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; align-content: center; gap: 10px;
-  background: rgba(250, 249, 252, .88); backdrop-filter: blur(3px);
+  position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; align-content: center; gap: 14px;
+  background: #fdfbfe;
 }
-.road { position: relative; width: 100%; height: 2.1in; overflow: hidden; }
-.skyline { position: absolute; left: 0; right: 0; bottom: 10px; height: 120px; }
-.skyline svg { width: 100%; height: 100%; display: block; }
-.ground { position: absolute; left: 0; right: 0; bottom: 8px; height: 2px; background: linear-gradient(90deg, transparent, var(--purple-tint) 15%, #d8cdee 50%, var(--purple-tint) 85%, transparent); }
-.drive {
-  position: absolute; bottom: 4px; left: 0; display: flex; align-items: flex-end;
-  animation: drive-across 1.5s cubic-bezier(.2, .1, .5, 1) infinite;
-  will-change: transform;
+.scene { position: relative; width: min(100%, 900px); height: 140px; overflow: hidden; }
+.skyline {
+  position: absolute; right: 0; bottom: 0; width: 512px; height: 134px; max-width: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 60px);
+          mask-image: linear-gradient(90deg, transparent 0, #000 60px);
 }
-.vehicle { width: 2in; height: calc(2in * 90 / 220); }
-.vehicle svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 3px 4px rgba(78, 42, 132, .18)); animation: bob .35s ease-in-out infinite alternate; }
-.speed { position: absolute; right: calc(100% + 4px); bottom: 18px; display: grid; gap: 7px; justify-items: end; }
-.speed i { display: block; height: 4px; border-radius: 3px; background: linear-gradient(90deg, transparent, var(--purple)); opacity: .35; }
-.speed i:nth-child(1) { width: 1.1in; }
-.speed i:nth-child(2) { width: .7in; opacity: .25; }
-.speed i:nth-child(3) { width: 1.3in; }
-.speed i:nth-child(4) { width: .5in; opacity: .2; }
+.ground { position: absolute; left: 0; right: 0; bottom: 1px; height: 2px; background: linear-gradient(90deg, transparent, #d9d0ef 30%, #cfc4ea); }
+.parked {
+  position: absolute; bottom: 2px;
+  left: max(1.4in, calc(100% - 512px - 2in + 40px));
+}
+.vehicle { width: 2in; height: calc(2in * 90 / 220); position: relative; }
+.vehicle svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 3px 4px rgba(78, 42, 132, .18)); }
+.streaks { position: absolute; right: calc(100% - 6px); bottom: 10px; display: grid; gap: 6px; justify-items: end; }
+.streaks i {
+  display: block; height: 6px; border-radius: 4px;
+  background: linear-gradient(90deg, rgba(185, 166, 221, 0), rgba(140, 110, 200, .55));
+  transform-origin: right center; opacity: 0;
+  animation: streak 1.1s ease-out infinite;
+}
+.streaks i:nth-child(1) { width: 1.0in; animation-delay: 0s; }
+.streaks i:nth-child(2) { width: 1.4in; animation-delay: .35s; height: 4px; }
+.streaks i:nth-child(3) { width: 0.8in; animation-delay: .15s; }
+.streaks i:nth-child(4) { width: 1.6in; animation-delay: .55s; height: 8px; }
+.streaks i:nth-child(5) { width: 1.1in; animation-delay: .25s; height: 4px; }
+.streaks i:nth-child(6) { width: 0.6in; animation-delay: .7s; }
 .loading-text { margin: 0; font-weight: 600; color: var(--purple); letter-spacing: .01em; }
-@keyframes drive-across {
-  from { transform: translateX(-2in); }
-  to   { transform: translateX(100vw); }
+@keyframes streak {
+  0%   { opacity: 0; transform: translateX(10px) scaleX(.3); }
+  35%  { opacity: 1; transform: translateX(0) scaleX(1); }
+  100% { opacity: 0; transform: translateX(-28px) scaleX(1); }
 }
-@keyframes bob { from { transform: translateY(0); } to { transform: translateY(-1.5px); } }
 @media (prefers-reduced-motion: reduce) {
-  .drive { animation: none; left: 50%; transform: translateX(-50%); }
-  .speed { display: none; }
-  .vehicle svg { animation: none; }
+  .streaks i { animation: none; opacity: .5; }
 }
+
 
 dialog { border: 0; border-radius: var(--radius); padding: 24px; max-width: 520px; width: calc(100% - 32px); }
 dialog::backdrop { background: rgba(29, 27, 34, .45); }
@@ -178,3 +186,10 @@ dialog form { text-align: right; margin-top: 12px; }
 .trunk { display: flex; gap: 8px; align-items: center; background: var(--purple-tint); border-radius: 8px; padding: 10px 12px; margin-top: 12px; font-size: 14px; }
 .intro { font-size: 16px; font-weight: 500; color: var(--ink); margin: 0 0 8px; }
 .page-intro { background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--purple); border-radius: var(--radius); padding: 14px 18px; margin: 0 0 20px; }
+@media (max-width: 760px) {
+  /* Narrow screens: keep the reference composition — vehicle on the left, skyline continuing to its right */
+  .parked { left: 0.8in; }
+  .skyline { right: auto; left: calc(0.8in + 2in - 48px); }
+  .streaks i:nth-child(4) { width: 0.8in; }
+  .streaks i:nth-child(2) { width: 0.7in; }
+}

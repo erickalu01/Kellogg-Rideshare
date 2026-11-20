@@ -92,27 +92,6 @@ export const VEHICLES = {
   },
 };
 
-// Soft purple skyline for the background strip (generic city + glass campus building).
-export const SKYLINE = `
-<svg viewBox="0 0 1200 120" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <g fill="${P3}" opacity=".45">
-    <rect x="520" y="40" width="34" height="80"/><rect x="530" y="10" width="14" height="30"/><rect x="535" y="0" width="4" height="12"/>
-    <rect x="470" y="62" width="40" height="58"/><rect x="560" y="55" width="30" height="65"/>
-    <rect x="600" y="70" width="44" height="50"/><rect x="430" y="80" width="34" height="40"/>
-    <rect x="650" y="48" width="26" height="72"/><rect x="380" y="90" width="44" height="30"/>
-  </g>
-  <g fill="${P3}" opacity=".7">
-    <path d="M700 120 L700 78 Q760 56 860 64 L940 70 L940 120 Z"/>
-    <path d="M880 120 L880 84 Q930 72 1000 80 L1000 120 Z"/>
-  </g>
-  <g fill="#fff" opacity=".55">
-    ${Array.from({ length: 9 }, (_, i) => `<rect x="${712 + i * 24}" y="84" width="16" height="4" rx="1"/><rect x="${712 + i * 24}" y="96" width="16" height="4" rx="1"/>`).join("")}
-  </g>
-  <g fill="${P2}" opacity=".35">
-    <circle cx="690" cy="110" r="9"/><circle cx="960" cy="108" r="10"/><circle cx="1010" cy="112" r="8"/><circle cx="360" cy="112" r="8"/>
-  </g>
-</svg>`;
-
 const ORDER = ["trolley", "partybus", "sedan"];
 let last = -1;
 export function nextVehicle() {

@@ -1,6 +1,6 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, ALLOWED_DOMAIN, TIMEZONE } from "./config.js?v=9";
-import { nextVehicle, SKYLINE } from "./vehicles.js?v=9";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, ALLOWED_DOMAIN, TIMEZONE } from "./config.js?v=11";
+import { nextVehicle } from "./vehicles.js?v=11";
 
 const sb = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
@@ -38,9 +38,9 @@ function show(view) {
   views.forEach((v) => $(v).classList.toggle("hidden", v !== view));
   $("userbox").classList.toggle("hidden", view !== "view-app");
 }
-// Loading overlay: a 2-inch vehicle drives across the screen.
-// It stays up for at least one full pass so the animation never flickers.
-const MIN_SHOW_MS = 1500;
+// Loading overlay: a parked 2-inch vehicle with streaks fading in and out behind it.
+// It stays up briefly at minimum so it never just flickers.
+const MIN_SHOW_MS = 1100;
 let shownAt = 0, hideTimer = null, busyCount = 0;
 function busy(on, msg = "Loading…") {
   const el = $("loading");
@@ -50,9 +50,6 @@ function busy(on, msg = "Loading…") {
     if (el.classList.contains("hidden")) {
       const v = nextVehicle();
       el.querySelector(".vehicle").innerHTML = v.svg;
-      el.querySelector(".skyline").innerHTML ||= SKYLINE;
-      const drive = el.querySelector(".drive");
-      drive.style.animation = "none"; void drive.offsetWidth; drive.style.animation = "";
       shownAt = Date.now();
       el.classList.remove("hidden");
     }
