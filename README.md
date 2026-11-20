@@ -25,7 +25,7 @@ A GitHub Pages site where Kellogg students find classmates arriving or leaving a
 
 | Setting | Where | Value |
 |---|---|---|
-| **Send a code, not a link** | Authentication → Emails → *Magic Link* template | Body must include `{{ .Token }}` (sample below) |
+| **Send a code, not a link** | Authentication → Emails → *Confirm sign up* **and** *Magic link or OTP* templates | Both bodies must include `{{ .Token }}` and no link (sample below). First-time users get *Confirm sign up*; returning users get *Magic link or OTP*. |
 | **Kellogg-only sign-ups** | Authentication → Hooks → *Before User Created* | Postgres function `public.hook_kellogg_only_signup` |
 | **Custom SMTP (required for real users)** | Authentication → Emails → SMTP Settings | Currently Gmail: `kelloggridecoordination@gmail.com` via `smtp.gmail.com:465` with a Google app password (about 500 emails/day). Supabase's built-in mailer only sends to project team members. |
 | Site URL | Authentication → URL Configuration | `https://erickalu01.github.io/Kellogg-Rideshare/` |
