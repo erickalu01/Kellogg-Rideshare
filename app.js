@@ -1,6 +1,6 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, ALLOWED_DOMAIN, TIMEZONE } from "./config.js?v=8";
-import { nextVehicle, SKYLINE } from "./vehicles.js?v=8";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, ALLOWED_DOMAIN, TIMEZONE } from "./config.js?v=9";
+import { nextVehicle, SKYLINE } from "./vehicles.js?v=9";
 
 const sb = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
