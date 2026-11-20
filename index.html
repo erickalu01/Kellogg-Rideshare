@@ -8,17 +8,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=11" />
+  <link rel="stylesheet" href="styles.css?v=12" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <span class="logo" aria-hidden="true">K</span>
-      <span>Kellogg Rideshare</span>
+  <header class="ribbon">
+    <div class="ribbon-scene" aria-hidden="true">
+      <img class="ribbon-skyline" src="assets/skyline.png" alt="" />
+      <div class="ribbon-ground"></div>
+      <div class="ribbon-parked">
+        <div class="ribbon-streaks"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="ribbon-vehicle" id="ribbon-vehicle"></div>
+      </div>
     </div>
-    <div id="userbox" class="userbox hidden">
-      <span id="useremail"></span>
-      <button id="signout" class="link">Sign out</button>
+    <div class="ribbon-bar">
+      <div class="brand">
+        <span class="logo" aria-hidden="true">K</span>
+        <span>Kellogg Rideshare</span>
+      </div>
+      <div id="userbox" class="userbox hidden">
+        <span id="useremail"></span>
+        <button id="signout" class="link">Sign out</button>
+      </div>
     </div>
   </header>
 
@@ -172,6 +182,6 @@
     <form method="dialog"><button class="link">Close</button></form>
   </dialog>
 
-  <script type="module" src="app.js?v=11"></script>
+  <script type="module" src="app.js?v=12"></script>
 </body>
 </html>

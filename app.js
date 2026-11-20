@@ -1,6 +1,6 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, ALLOWED_DOMAIN, TIMEZONE } from "./config.js?v=11";
-import { nextVehicle } from "./vehicles.js?v=11";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, ALLOWED_DOMAIN, TIMEZONE } from "./config.js?v=12";
+import { nextVehicle } from "./vehicles.js?v=12";
 
 const sb = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
@@ -42,13 +42,18 @@ function show(view) {
 // It stays up briefly at minimum so it never just flickers.
 const MIN_SHOW_MS = 1100;
 let shownAt = 0, hideTimer = null, busyCount = 0;
+// Pick this page load's vehicle for the top ribbon; the first loading screen uses the same one.
+const pageVehicle = nextVehicle();
+$("ribbon-vehicle").innerHTML = pageVehicle.svg;
+let firstLoad = true;
 function busy(on, msg = "Loading…") {
   const el = $("loading");
   if (on) {
     busyCount++;
     clearTimeout(hideTimer);
     if (el.classList.contains("hidden")) {
-      const v = nextVehicle();
+      const v = firstLoad ? pageVehicle : nextVehicle();
+      firstLoad = false;
       el.querySelector(".vehicle").innerHTML = v.svg;
       shownAt = Date.now();
       el.classList.remove("hidden");
